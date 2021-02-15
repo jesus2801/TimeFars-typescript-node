@@ -30,11 +30,12 @@ export const postLoginCtrl = async (req: Request, res: Response) => {
           sub: isValidUser.userID,
           name: isValidUser.userName,
           avatar: 'n-1',
+          verified: false,
         },
         secretKey,
         {expiresIn: '30h'}
       );
-      res.cookie('token', token);
+      res.cookie('token', token, {httpOnly: true});
       res.redirect('/home');
       return;
     }

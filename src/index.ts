@@ -1,5 +1,4 @@
 const path = require('path');
-
 require('dotenv').config(path.resolve('../.env'));
 
 import {App} from './server.config';

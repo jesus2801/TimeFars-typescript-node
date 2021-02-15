@@ -1,11 +1,11 @@
 import express, {Application, Request, Response} from 'express';
 import {initialize, session} from 'passport';
 import cookieSession from 'cookie-session';
+import exHbs from 'express-handlebars';
+import cookieParser from 'cookie-parser';
+import compression from 'compression';
 const path = require('path');
-const exHbs = require('express-handlebars');
-const cookieParser = require('cookie-parser');
-const compression = require('compression');
-require('../passport.setup');
+require('./passport.setup');
 
 export class App {
   private app: Application;
@@ -47,6 +47,7 @@ export class App {
   }
   routes() {
     this.app.use(require('./routes/'));
+    this.app.use(require('./routes/app/home'));
   }
   extra() {
     this.app.use(express.static(path.join(__dirname, 'public')));

@@ -1,11 +1,11 @@
-import express, {Response} from 'express';
+import express from 'express';
 const router = express.Router();
 import {mainView} from '../controllers/router/index.controller';
 import {loginMainView, postLoginCtrl} from '../controllers/router/login.controller';
 import {postSignupCtrl, signupMainView} from '../controllers/router/signup.controller';
 import passport from 'passport';
-import {verifyToken} from '../helpers/helperFunctions';
-import {authCallback} from '../controllers/router/auth.controller';
+import {authCallback, verifyEmailCtrl} from '../controllers/router/auth.controller';
+import {verifyUser} from '../helpers/helperFunctions';
 
 router.route('/login').get(loginMainView).post(postLoginCtrl);
 router.route('/signup').get(signupMainView).post(postSignupCtrl);
@@ -28,8 +28,8 @@ router.get(
   authCallback
 );
 
-router.get('/home', verifyToken, (req: any, res: Response) => {
-  res.send(`Hola ${req.token.name}`);
-});
+router.get('/verifyEmail', verifyUser, verifyEmailCtrl);
+
+router.get('unverifiedEmail', verifyUser, );
 
 module.exports = router;

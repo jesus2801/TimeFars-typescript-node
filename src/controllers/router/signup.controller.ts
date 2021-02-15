@@ -42,11 +42,12 @@ export const postSignupCtrl = async (req: Request, res: Response) => {
         sub: userID,
         name,
         avatar: 'n-1',
+        verified: false,
       },
       secretKey,
       {expiresIn: '30h'}
     );
-    res.cookie('token', token);
+    res.cookie('token', token, {httpOnly: true});
     res.redirect('/home');
   } catch (e) {
     if (e.code == 'ER_DUP_ENTRY') {
