@@ -3,7 +3,7 @@ import {reportError} from '../../helpers/reportError';
 
 export const mainView = (req: Request, res: Response) => {
   try {
-    res.render('app/home', {
+    res.status(200).render('app/home', {
       title: 'TimeFars - Home',
     });
   } catch (e) {

@@ -22,8 +22,10 @@ export function sendMail(dest: string, subject: string, html: string): Promise<v
     };
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
+        console.log('error :C');
         reject(error);
       } else {
+        console.log('enviado !');
         resolved();
       }
     });

@@ -3,8 +3,8 @@ import {reportError} from '../../helpers/reportError';
 
 export const mainView = (req: Request, res: Response) => {
   try {
-    res.status(200).render('index', {
-      title: 'TimeFars - Inicio',
+    res.render('404', {
+      title: 'TimeFars - 404',
     });
   } catch (e) {
     res.redirect('/err');

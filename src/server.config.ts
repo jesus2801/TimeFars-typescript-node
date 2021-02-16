@@ -4,6 +4,7 @@ import cookieSession from 'cookie-session';
 import exHbs from 'express-handlebars';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
+import {mainView} from './controllers/router/404.controller';
 const path = require('path');
 require('./passport.setup');
 
@@ -48,12 +49,11 @@ export class App {
   routes() {
     this.app.use(require('./routes/'));
     this.app.use(require('./routes/app/home'));
+    this.app.use('/tasks', require('./routes/app/tasks'));
   }
   extra() {
     this.app.use(express.static(path.join(__dirname, 'public')));
-    this.app.use(function (req: Request, res: Response) {
-      res.status(404).send('404 pagina no encontrada');
-    });
+    this.app.use(mainView);
   }
   async listen() {
     const server = await this.app.listen(this.app.get('port'));

@@ -1,14 +1,15 @@
 import {PoolConnection} from 'mysql2/promise';
 import {connect} from '../../database';
 
-export function insertUser(names: string, mail: string, pass: string) {
+export function insertUser(names: string, mail: string, pass: string, code: string) {
   return new Promise<number>(async (resolved, reject) => {
     try {
       const conn: PoolConnection = await connect();
-      const [[response]]: any = await conn.query('CALL insertUser(?,?,?)', [
+      const [[response]]: any = await conn.query('CALL insertUser(?,?,?,?)', [
         names,
         mail,
         pass,
+        code,
       ]);
       conn.release();
       resolved(response[0].latestId);

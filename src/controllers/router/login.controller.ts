@@ -8,7 +8,7 @@ import {secretKey} from '../../config';
 
 export const loginMainView = async (req: Request, res: Response) => {
   try {
-    res.render('out/login', {
+    res.status(200).render('out/login', {
       title: 'TimeFars - Ingresar',
     });
   } catch (e) {
@@ -25,12 +25,13 @@ export const postLoginCtrl = async (req: Request, res: Response) => {
     }
     const isValidUser: any = await validLoginUser(mail, pass);
     if (isValidUser) {
+      const verified = Object.values(isValidUser.verified)[0] == 1 ? true : false;
       const token = jwt.sign(
         {
           sub: isValidUser.userID,
           name: isValidUser.userName,
           avatar: 'n-1',
-          verified: false,
+          verified: verified,
         },
         secretKey,
         {expiresIn: '30h'}

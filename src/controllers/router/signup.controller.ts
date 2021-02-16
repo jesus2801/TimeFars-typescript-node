@@ -1,14 +1,20 @@
 import {Request, Response} from 'express';
 import {reportError} from '../../helpers/reportError';
 import {isEmpty, validEmail, validUserName} from '../../helpers/validateFunctions';
-import {hashPass, sendResponse} from '../../helpers/helperFunctions';
+import {
+  generateCode,
+  generateEmailHTML,
+  hashPass,
+  sendResponse,
+} from '../../helpers/helperFunctions';
 import {insertUser} from '../DB/signup.controller';
 import jwt from 'jsonwebtoken';
 import {secretKey} from '../../config';
+import {sendMail} from '../../nodeMailer.setup';
 
 export const signupMainView = async (req: Request, res: Response) => {
   try {
-    res.render('out/signup', {
+    res.status(200).render('out/signup', {
       title: 'TimeFars - Registro',
     });
   } catch (e) {
@@ -36,7 +42,8 @@ export const postSignupCtrl = async (req: Request, res: Response) => {
       return;
     }
     const hash: string = await hashPass(pass);
-    const userID = await insertUser(name, email, hash);
+    const code: string = await generateCode();
+    const userID = await insertUser(name, email, hash, code);
     const token = jwt.sign(
       {
         sub: userID,
@@ -49,6 +56,11 @@ export const postSignupCtrl = async (req: Request, res: Response) => {
     );
     res.cookie('token', token, {httpOnly: true});
     res.redirect('/home');
+    sendMail(email, 'verificar correo TimeFars', generateEmailHTML(name, code)).catch(
+      e => {
+        reportError(e, req.ip, req.url, userID);
+      }
+    );
   } catch (e) {
     if (e.code == 'ER_DUP_ENTRY') {
       sendResponse(res, true, 'El correo ingresado ya está utilizado por otro usuario.');
