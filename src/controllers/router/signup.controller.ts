@@ -52,9 +52,12 @@ export const postSignupCtrl = async (req: Request, res: Response) => {
         verified: false,
       },
       secretKey,
-      {expiresIn: '30h'}
+      {expiresIn: '2d'}
     );
-    res.cookie('token', token, {httpOnly: true});
+    res.cookie('token', token, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 86400000),
+    });
     res.redirect('/home');
     sendMail(email, 'verificar correo TimeFars', generateEmailHTML(name, code)).catch(
       e => {

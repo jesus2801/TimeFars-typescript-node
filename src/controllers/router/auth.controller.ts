@@ -10,7 +10,10 @@ import {insertUser} from '../DB/signup.controller';
 
 export const authCallback = async (req: any, res: Response) => {
   try {
-    res.cookie('token', req.user.token, {httpOnly: true});
+    res.cookie('token', req.user.token, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 86400000),
+    });
     res.redirect('/home');
   } catch (e) {
     res.redirect('/err');
@@ -76,7 +79,7 @@ export function authCtrl(profile: any, id: string) {
             avatar: 'n-1',
           },
           secretKey,
-          {expiresIn: '30h'}
+          {expiresIn: '2d'}
         );
         profile.token = token;
         resolved(profile);
@@ -97,7 +100,7 @@ export function authCtrl(profile: any, id: string) {
           avatar: 'n-1',
         },
         secretKey,
-        {expiresIn: '30h'}
+        {expiresIn: '2d'}
       );
       profile.token = token;
       resolved(profile);
@@ -128,9 +131,12 @@ export const verifyEmailCtrl = async (req: any, res: Response) => {
         verified: true,
       },
       secretKey,
-      {expiresIn: '30h'}
+      {expiresIn: '2d'}
     );
-    res.cookie('token', newToken, {httpOnly: true});
+    res.cookie('token', newToken, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 86400000),
+    });
     res.redirect('/home');
   } catch (e) {
     res.redirect('/err');

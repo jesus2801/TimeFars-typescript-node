@@ -34,9 +34,12 @@ export const postLoginCtrl = async (req: Request, res: Response) => {
           verified: verified,
         },
         secretKey,
-        {expiresIn: '30h'}
+        {expiresIn: '2d'}
       );
-      res.cookie('token', token, {httpOnly: true});
+      res.cookie('token', token, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 86400000),
+      });
       res.redirect('/home');
       return;
     }
