@@ -1,13 +1,15 @@
-import {Request, Response} from 'express';
-import {reportError} from '../../helpers/reportError';
+import {NextFunction, Request, Response} from 'express';
+import {AppError} from '../../interfaces';
 
-export const mainView = (req: Request, res: Response) => {
-  try {
-    res.status(200).render('app/home', {
-      title: 'TimeFars - Home',
-    });
-  } catch (e) {
-    res.redirect('/err');
-    reportError(e, req.ip, req.url);
-  }
+export default {
+  mainView: (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.status(200).render('app/home', {
+        title: 'TimeFars - Home',
+      });
+    } catch (e) {
+      const err = new AppError(e, req);
+      return next(err);
+    }
+  },
 };

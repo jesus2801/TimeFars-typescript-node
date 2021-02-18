@@ -406,20 +406,3 @@ export function deleteRoutine(
     }
   });
 }
-
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-
-// export function name(userID: number | string): Promise<void> {
-
-//   return new Promise<void>(async (resolved, reject) => {
-//     const conn: PoolConnection = await connect();
-//     try {
-//       await conn.query('CALL name(?)', []);
-//       conn.release();
-//       resolved();
-//     } catch (e) {
-//       reject(e);
-//     }
-//   });
-// }

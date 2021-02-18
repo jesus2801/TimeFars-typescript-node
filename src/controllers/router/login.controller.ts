@@ -1,51 +1,55 @@
-import {Request, Response} from 'express';
-import {sendResponse} from '../../helpers/helperFunctions';
-import {reportError} from '../../helpers/reportError';
-import {validEmail} from '../../helpers/validateFunctions';
-import {validLoginUser} from '../DB/login.controller';
+import {NextFunction, Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
-import {secretKey} from '../../config';
 
-export const loginMainView = async (req: Request, res: Response) => {
-  try {
-    res.status(200).render('out/login', {
-      title: 'TimeFars - Ingresar',
-    });
-  } catch (e) {
-    res.redirect('/err');
-    reportError(e, req.ip, req.url);
-  }
-};
+import Helpers from '../../helpers/helperFunctions';
+import Validates from '../../helpers/validateFunctions';
+import {validLoginUser} from '../DB/login.controller';
+import {AppError} from '../../interfaces';
+import Errors from '../../assets/errors';
+import Config from '../../config';
 
-export const postLoginCtrl = async (req: Request, res: Response) => {
-  try {
-    let {mail, pass} = req.body;
-    if (!validEmail(mail)) {
-      sendResponse(res, true, 'El correo ingresado es inválido');
-    }
-    const isValidUser: any = await validLoginUser(mail, pass);
-    if (isValidUser) {
-      const verified = Object.values(isValidUser.verified)[0] == 1 ? true : false;
-      const token = jwt.sign(
-        {
-          sub: isValidUser.userID,
-          name: isValidUser.userName,
-          avatar: 'n-1',
-          verified: verified,
-        },
-        secretKey,
-        {expiresIn: '2d'}
-      );
-      res.cookie('token', token, {
-        httpOnly: true,
-        expires: new Date(Date.now() + 86400000),
+export default {
+  mainView: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.status(200).render('out/login', {
+        title: 'TimeFars - Ingresar',
       });
-      res.redirect('/home');
-      return;
+    } catch (e) {
+      const err = new AppError(e, req);
+      return next(err);
     }
-    sendResponse(res, true, 'El correo y/o contraseña ingresados son incorrectos.');
-  } catch (e) {
-    res.redirect('/err');
-    reportError(e, req.ip, req.url);
-  }
+  },
+
+  postCtrl: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let {mail, pass} = req.body;
+      if (!Validates.validEmail(mail)) {
+        Helpers.sendResponse(res, true, Errors.invalidField('Correo'));
+      }
+      const isValidUser: any = await validLoginUser(mail, pass);
+      if (isValidUser) {
+        const verified = Object.values(isValidUser.verified)[0] == 1 ? true : false;
+        const token = jwt.sign(
+          {
+            sub: isValidUser.userID,
+            name: isValidUser.userName,
+            avatar: 'n-1',
+            verified: verified,
+          },
+          Config.secretKey,
+          {expiresIn: '2d'}
+        );
+        res.cookie('token', token, {
+          httpOnly: true,
+          expires: new Date(Date.now() + 86400000),
+        });
+        res.redirect('/home');
+        return;
+      }
+      Helpers.sendResponse(res, true, Errors.invalidCredentials);
+    } catch (e) {
+      const err = new AppError(e, req);
+      return next(err);
+    }
+  },
 };

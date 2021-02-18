@@ -1,10 +1,19 @@
-import express, {Application, Request, Response} from 'express';
+//nodejs modules
+import express, {Application, urlencoded, json} from 'express';
 import {initialize, session} from 'passport';
 import cookieSession from 'cookie-session';
-import exHbs from 'express-handlebars';
 import cookieParser from 'cookie-parser';
+import exHbs from 'express-handlebars';
 import compression from 'compression';
-import {mainView} from './controllers/router/404.controller';
+
+//modules
+import ErrorsCtrl from './controllers/router/errors.controller';
+import NotFoundCtrl from './controllers/router/404.controller';
+import tasksRoutes from './routes/app/tasks.routes';
+import homeRoute from './routes/app/home.routes';
+import mainRoutes from './routes/index.routes';
+import config from './config';
+
 const path = require('path');
 require('./passport.setup');
 
@@ -34,8 +43,8 @@ export class App {
   }
   middlewares() {
     this.app.use(compression());
-    this.app.use(express.urlencoded({extended: false, limit: 5242880}));
-    this.app.use(express.json({limit: 5242880}));
+    this.app.use(urlencoded({extended: false, limit: 5242880}));
+    this.app.use(json({limit: 5242880}));
     this.app.use(cookieParser());
     this.app.use(
       cookieSession({
@@ -47,17 +56,21 @@ export class App {
     this.app.use(session()); //passport
   }
   routes() {
-    this.app.use(require('./routes/'));
-    this.app.use(require('./routes/app/home'));
-    this.app.use('/tasks', require('./routes/app/tasks'));
+    this.app.use(mainRoutes);
+    this.app.use(homeRoute);
+    this.app.use('/tasks', tasksRoutes);
   }
   extra() {
     this.app.use(express.static(path.join(__dirname, 'public')));
-    this.app.use(mainView);
+    this.app.use(NotFoundCtrl.mainView);
+    this.app.use(ErrorsCtrl.mainView);
   }
   async listen() {
     const server = await this.app.listen(this.app.get('port'));
-    console.log(`server is running on port ${this.app.get('port')}`);
+    console.log(
+      `server is running on port ${this.app.get('port')} and 
+      host ${config.hostProtocol}${config.host}`
+    );
     return server;
   }
 }

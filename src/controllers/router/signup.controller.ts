@@ -1,75 +1,70 @@
-import {Request, Response} from 'express';
-import {reportError} from '../../helpers/reportError';
-import {isEmpty, validEmail, validUserName} from '../../helpers/validateFunctions';
-import {
-  generateCode,
-  generateEmailHTML,
-  hashPass,
-  sendResponse,
-} from '../../helpers/helperFunctions';
-import {insertUser} from '../DB/signup.controller';
+import {NextFunction, Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
-import {secretKey} from '../../config';
+
+import Validates from '../../helpers/validateFunctions';
+import Helpers from '../../helpers/helperFunctions';
+import {reportError} from '../../helpers/reportError';
+import {insertUser} from '../DB/signup.controller';
 import {sendMail} from '../../nodeMailer.setup';
+import {AppError} from '../../interfaces';
+import Errors from '../../assets/errors';
+import Config from '../../config';
 
-export const signupMainView = async (req: Request, res: Response) => {
-  try {
-    res.status(200).render('out/signup', {
-      title: 'TimeFars - Registro',
-    });
-  } catch (e) {
-    res.redirect('/err');
-    reportError(e, req.ip, req.url);
-  }
-};
+export default {
+  mainView: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.status(200).render('out/signup', {
+        title: 'TimeFars - Registro',
+      });
+    } catch (e) {
+      const err = new AppError(e, req);
+      return next(err);
+    }
+  },
 
-export const postSignupCtrl = async (req: Request, res: Response) => {
-  try {
-    let {name, email, pass} = req.body;
-    name = name.trim();
-    email = email.trim();
-    pass = pass.trim();
-    if (isEmpty(name) || isEmpty(email) || isEmpty(pass)) {
-      sendResponse(res, true, 'Porfavor rellene correctamente todos los campos.');
-      return;
-    }
-    if (!validUserName(name)) {
-      sendResponse(res, true, 'Nombre de usuario ingresado contiene simbolos inválidos.');
-      return;
-    }
-    if (!validEmail(email)) {
-      sendResponse(res, true, 'Correo ingresado inválido.');
-      return;
-    }
-    const hash: string = await hashPass(pass);
-    const code: string = await generateCode();
-    const userID = await insertUser(name, email, hash, code);
-    const token = jwt.sign(
-      {
-        sub: userID,
-        name,
-        avatar: 'n-1',
-        verified: false,
-      },
-      secretKey,
-      {expiresIn: '2d'}
-    );
-    res.cookie('token', token, {
-      httpOnly: true,
-      expires: new Date(Date.now() + 86400000),
-    });
-    res.redirect('/home');
-    sendMail(email, 'verificar correo TimeFars', generateEmailHTML(name, code)).catch(
-      e => {
-        reportError(e, req.ip, req.url, userID);
+  postCtrl: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let {name, email, pass} = req.body;
+      if (!Validates.validUserName(name)) {
+        Helpers.sendResponse(res, true, Errors.invalidSimbols('Nombre de usuario'));
+        return;
       }
-    );
-  } catch (e) {
-    if (e.code == 'ER_DUP_ENTRY') {
-      sendResponse(res, true, 'El correo ingresado ya está utilizado por otro usuario.');
-      return;
+      if (!Validates.validEmail(email)) {
+        Helpers.sendResponse(res, true, Errors.invalidField('Correo electronico'));
+        return;
+      }
+      const hash: string = await Helpers.hashPass(pass);
+      const code: string = Helpers.generateCode();
+      const userID = await insertUser(name, email, hash, code);
+      const token = jwt.sign(
+        {
+          sub: userID,
+          name,
+          avatar: 'n-1',
+          verified: false,
+        },
+        Config.secretKey,
+        {expiresIn: '2d'}
+      );
+      res.cookie('token', token, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 86400000),
+      });
+      res.redirect('/home');
+      sendMail(
+        email,
+        'verificar correo TimeFars',
+        Helpers.generateEmailHTML(name, code)
+      ).catch(e => {
+        reportError(e, req.ip, req.url, userID);
+      });
+    } catch (e) {
+      if (e.code == 'ER_DUP_ENTRY') {
+        Helpers.sendResponse(res, true, Errors.emailInUse);
+        return;
+      }
+      const err = new AppError(e, req);
+      return next(err);
     }
-    res.redirect('/err');
-    reportError(e, req.ip, req.url);
-  }
+  },
 };
