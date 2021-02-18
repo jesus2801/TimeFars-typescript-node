@@ -34,21 +34,21 @@ router.delete('/delete/:activityID', verifyToken, deleteTaskCtrl);
 router.post('/getProjects', verifyToken, getProjectsCtrl);
 router.post('/createProject', verifyToken, insertProjectCtrl);
 router.put('/updateProject', verifyToken, updateProjectCtrl);
-router.delete('/deleteProject', verifyToken, deleteProjectCtrl);
+router.delete('/deleteProject/:projectID', verifyToken, deleteProjectCtrl);
 
-router.post('/getProjectTasks', verifyToken, getProjectTasksCtrl);
+router.post('/getProjectTasks/:projectID', verifyToken, getProjectTasksCtrl);
 router.post('/createProjectTask', verifyToken, insertProjectTaskCtrl);
 router.put('/updateProjectTask', verifyToken, updateProjectTaskCtrl);
-router.delete('/deleteProjectTask', verifyToken);
+router.delete('/deleteProjectTask/:activityID', verifyToken);
 
-router.post('/getRoutineTasks', verifyToken, getRoutineTasksCtrl);
+router.post('/getRoutineTasks/:routineID', verifyToken, getRoutineTasksCtrl);
 router.post('/createRoutineTask', verifyToken, createRoutineTaskCtrl);
 router.put('/updateRoutineTask', verifyToken, updateRoutineTaskCtrl);
-router.delete('/deleteRoutineTask', verifyToken, deleteRoutineTaskCtrl);
+router.delete('/deleteRoutineTask/:activityID', verifyToken, deleteRoutineTaskCtrl);
 
 router.post('/getRoutines', verifyToken, getRoutinesCtrl);
 router.post('/createRoutine', verifyToken, createRoutineCtrl);
 router.put('/updateRoutine', verifyToken, updateRoutineCtrl);
-router.delete('/deleteRoutine', verifyToken, deleteRoutineCtrl);
+router.delete('/deleteRoutine/:routineID', verifyToken, deleteRoutineCtrl);
 
 module.exports = router;
