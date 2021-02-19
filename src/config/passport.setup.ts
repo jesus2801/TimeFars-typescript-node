@@ -3,7 +3,7 @@ import {Strategy as FacebookStrategy} from 'passport-facebook';
 import passport from 'passport';
 
 import Config from './config';
-import Auth from './middlewares/auth';
+import Auth from '../middlewares/auth';
 
 passport.serializeUser(function (user: any, done) {
   done(null, user);

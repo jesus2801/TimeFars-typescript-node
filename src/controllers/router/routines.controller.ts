@@ -1,18 +1,10 @@
 import {Response, NextFunction} from 'express';
-import Errors from '../../assets/errors';
+
+import {AppError} from '../../interfaces/index.interfaces';
+import RoutinesDBCtrl from '../DB/routines.controller';
 import Helpers from '../../helpers/helperFunctions';
-import {AppError} from '../../interfaces';
-import {insertAction} from '../DB/functions';
-import {
-  createRoutine,
-  createRoutineTask,
-  deleteRoutine,
-  deleteRoutineTask,
-  getRoutines,
-  getRoutineTasks,
-  updateRoutine,
-  updateRoutineTask,
-} from '../DB/tasks.controller';
+import DBFunctions from '../DB/functions';
+import Errors from '../../assets/errors';
 
 const colorRegex = new RegExp(/^\w{6}$/);
 
@@ -20,7 +12,7 @@ export default {
   getRoutineTasks: async (req: any, res: Response, next: NextFunction) => {
     try {
       let {routineID} = req.params;
-      getRoutineTasks(req.token.sub, routineID);
+      RoutinesDBCtrl.getRoutineTasks(req.token.sub, routineID);
       res.send();
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -41,7 +33,7 @@ export default {
         Helpers.sendResponse(res, true, Errors.incognitoError);
         return;
       }
-      await createRoutineTask(
+      await RoutinesDBCtrl.createRoutineTask(
         routineID,
         activity,
         done,
@@ -51,7 +43,7 @@ export default {
         finalTime
       );
       res.send();
-      insertAction(req.token.sub, 'insert', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'insert', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
@@ -79,7 +71,7 @@ export default {
         Helpers.sendResponse(res, true, Errors.incognitoError);
         return;
       }
-      await updateRoutineTask(
+      await RoutinesDBCtrl.updateRoutineTask(
         daily_activityID,
         activity,
         done,
@@ -89,7 +81,7 @@ export default {
         finalTime
       );
       res.send();
-      insertAction(req.token.sub, 'update', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'update', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
@@ -101,9 +93,9 @@ export default {
   deleteRoutineTask: async (req: any, res: Response, next: NextFunction) => {
     try {
       let {activityID} = req.body;
-      deleteRoutineTask(req.token.sub, activityID);
+      RoutinesDBCtrl.deleteRoutineTask(req.token.sub, activityID);
       res.send();
-      insertAction(req.token.sub, 'delete', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'delete', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
@@ -114,7 +106,7 @@ export default {
 
   getRoutines: async (req: any, res: Response, next: NextFunction) => {
     try {
-      const routines = await getRoutines(req.token.sub);
+      const routines = await RoutinesDBCtrl.getRoutines(req.token.sub);
       res.send(routines);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -126,7 +118,7 @@ export default {
 
   createRoutine: async (req: any, res: Response, next: NextFunction) => {
     try {
-      await createRoutine(req.token.sub);
+      await RoutinesDBCtrl.createRoutine(req.token.sub);
       res.send();
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -141,7 +133,13 @@ export default {
       let {routineID, title, description, active} = req.body;
       routineID = parseInt(routineID);
       active = parseInt(active);
-      await updateRoutine(req.token.sub, routineID, title, description, active);
+      await RoutinesDBCtrl.updateRoutine(
+        req.token.sub,
+        routineID,
+        title,
+        description,
+        active
+      );
       res.send();
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -154,9 +152,9 @@ export default {
   deleteRoutine: async (req: any, res: Response, next: NextFunction) => {
     try {
       let {routineID} = req.params;
-      deleteRoutine(req.token.sub, routineID);
+      RoutinesDBCtrl.deleteRoutine(req.token.sub, routineID);
       res.send();
-      insertAction(req.token.sub, 'delete', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'delete', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);

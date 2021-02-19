@@ -1,17 +1,11 @@
 import {NextFunction, Response} from 'express';
 
+import {AppError} from '../../interfaces/index.interfaces';
+import {TaskDB} from '../../interfaces/tasks.interfaces';
 import Helpers from '../../helpers/helperFunctions';
-import {TaskDB} from '../../interfaces/tasks';
-import {insertAction} from '../DB/functions';
-import {AppError} from '../../interfaces';
+import TasksDBCtrl from '../DB/tasks.controller';
+import DBFunctions from '../DB/functions';
 import Errors from '../../assets/errors';
-import {
-  getTasks,
-  insertActivity,
-  insertTask,
-  updateActivity,
-  deleteActivity,
-} from '../DB/tasks.controller';
 
 const colorRegex = new RegExp(/^\w{6}$/);
 
@@ -31,7 +25,7 @@ export default {
 
   getTasks: async (req: any, res: Response, next: NextFunction) => {
     try {
-      const tasks: TaskDB = await getTasks(req.token.sub);
+      const tasks: TaskDB = await TasksDBCtrl.getAll(req.token.sub);
       res.send(tasks);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -50,7 +44,7 @@ export default {
         Helpers.sendResponse(res, true, Errors.incognitoError);
         return;
       }
-      const insertId = await insertActivity(
+      const insertId = await TasksDBCtrl.insertActivity(
         req.token.sub,
         activity,
         color,
@@ -58,9 +52,9 @@ export default {
         startDate,
         finalDate
       );
-      await insertTask(insertId, new Date());
+      await TasksDBCtrl.insertTask(insertId, new Date());
       Helpers.sendResponse(res, false, '');
-      insertAction(req.token.sub, 'insert', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'insert', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
@@ -79,7 +73,7 @@ export default {
         Helpers.sendResponse(res, true, Errors.incognitoError);
         return;
       }
-      await updateActivity(
+      await TasksDBCtrl.updateActivity(
         req.token.sub,
         activityID,
         activity,
@@ -89,7 +83,7 @@ export default {
         finalDate
       );
       Helpers.sendResponse(res, false, '');
-      insertAction(req.token.sub, 'update', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'update', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
@@ -102,9 +96,9 @@ export default {
     try {
       let {activityID} = req.params;
       activityID = parseInt(activityID);
-      await deleteActivity(req.token.sub, activityID);
+      await TasksDBCtrl.deleteActivity(req.token.sub, activityID);
       Helpers.sendResponse(res, false, '');
-      insertAction(req.token.sub, 'delete', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'delete', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);

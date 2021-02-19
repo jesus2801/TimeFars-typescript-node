@@ -71,11 +71,7 @@ router.delete(
 );
 
 router.post('/getRoutines', Auth.verifyToken, RoutinesCtrl.getRoutines);
-router.post(
-  '/createRoutine',
-  Auth.verifyToken,
-  RoutinesCtrl.createRoutine
-);
+router.post('/createRoutine', Auth.verifyToken, RoutinesCtrl.createRoutine);
 router.put(
   '/updateRoutine',
   ValidateMW.emptyField,

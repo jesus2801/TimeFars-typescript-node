@@ -5,13 +5,14 @@ import cookieSession from 'cookie-session';
 import cookieParser from 'cookie-parser';
 import exHbs from 'express-handlebars';
 import compression from 'compression';
+import helmet from 'helmet';
 
 //modules
-import ErrorsCtrl from './controllers/router/errors.controller';
-import NotFoundCtrl from './controllers/router/404.controller';
-import tasksRoutes from './routes/app/tasks.routes';
-import homeRoute from './routes/app/home.routes';
-import mainRoutes from './routes/index.routes';
+import ErrorsCtrl from '../controllers/router/errors.controller';
+import NotFoundCtrl from '../controllers/router/404.controller';
+import tasksRoutes from '../routes/app/tasks.routes';
+import homeRoute from '../routes/app/home.routes';
+import mainRoutes from '../routes/index.routes';
 import config from './config';
 
 const path = require('path');
@@ -27,7 +28,7 @@ export class App {
     this.extra();
   }
   settings() {
-    this.app.set(`views`, path.join(__dirname, `views`));
+    this.app.set(`views`, path.join(__dirname, `../views`));
     this.app.set('port', process.env.PORT || this.port || 3000);
     this.app.set('view engine', '.hbs');
     this.app.engine(
@@ -37,11 +38,12 @@ export class App {
         layoutsDir: path.join(this.app.get('views'), 'layouts'),
         partialsDir: path.join(this.app.get('views'), 'partials'),
         extname: '.hbs',
-        helpers: require('./lib/handlebars'),
+        helpers: require('../lib/handlebars'),
       })
     );
   }
   middlewares() {
+    this.app.use(helmet());
     this.app.use(compression());
     this.app.use(urlencoded({extended: false, limit: 5242880}));
     this.app.use(json({limit: 5242880}));
@@ -61,7 +63,7 @@ export class App {
     this.app.use('/tasks', tasksRoutes);
   }
   extra() {
-    this.app.use(express.static(path.join(__dirname, 'public')));
+    this.app.use(express.static(path.join(__dirname, '../public')));
     this.app.use(NotFoundCtrl.mainView);
     this.app.use(ErrorsCtrl.mainView);
   }

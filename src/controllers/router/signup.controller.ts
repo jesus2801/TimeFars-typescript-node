@@ -5,10 +5,10 @@ import Validates from '../../helpers/validateFunctions';
 import Helpers from '../../helpers/helperFunctions';
 import {reportError} from '../../helpers/reportError';
 import {insertUser} from '../DB/signup.controller';
-import {sendMail} from '../../nodeMailer.setup';
-import {AppError} from '../../interfaces';
+import {sendMail} from '../../config/nodeMailer.setup';
+import {AppError} from '../../interfaces/index.interfaces';
 import Errors from '../../assets/errors';
-import Config from '../../config';
+import Config from '../../config/config';
 
 export default {
   mainView: async (req: Request, res: Response, next: NextFunction) => {

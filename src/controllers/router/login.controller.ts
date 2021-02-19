@@ -4,9 +4,9 @@ import jwt from 'jsonwebtoken';
 import Helpers from '../../helpers/helperFunctions';
 import Validates from '../../helpers/validateFunctions';
 import {validLoginUser} from '../DB/login.controller';
-import {AppError} from '../../interfaces';
+import {AppError} from '../../interfaces/index.interfaces';
 import Errors from '../../assets/errors';
-import Config from '../../config';
+import Config from '../../config/config';
 
 export default {
   mainView: async (req: Request, res: Response, next: NextFunction) => {

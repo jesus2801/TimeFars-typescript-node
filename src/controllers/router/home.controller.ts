@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from 'express';
-import {AppError} from '../../interfaces';
+import {AppError} from '../../interfaces/index.interfaces';
 
 export default {
   mainView: (req: Request, res: Response, next: NextFunction) => {

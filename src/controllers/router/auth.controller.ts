@@ -3,9 +3,9 @@ import jwt from 'jsonwebtoken';
 
 import {getCode, getEmail, validateEmailDB} from '../DB/auth.controller';
 import Helpers from '../../helpers/helperFunctions';
-import {sendMail} from '../../nodeMailer.setup';
-import {AppError} from '../../interfaces';
-import Config from '../../config';
+import {sendMail} from '../../config/nodeMailer.setup';
+import {AppError} from '../../interfaces/index.interfaces';
+import Config from '../../config/config';
 
 export default {
   unverifiedEmail: async (req: any, res: Response, next: NextFunction) => {

@@ -6,7 +6,7 @@ import IndexCtrl from '../controllers/router/index.controller';
 import LoginCtrl from '../controllers/router/login.controller';
 import AuthCtrl from '../controllers/router/auth.controller';
 import ValidateMW from '../middlewares/validate';
-import {AppError} from '../interfaces';
+import {AppError} from '../interfaces/index.interfaces';
 import Auth from '../middlewares/auth';
 
 const router: Router = Router();

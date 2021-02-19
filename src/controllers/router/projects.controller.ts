@@ -1,26 +1,18 @@
 import {Response, NextFunction} from 'express';
-import Errors from '../../assets/errors';
+
+import {AppError} from '../../interfaces/index.interfaces';
+import ProjectsDBCtrl from '../DB/projects.controller';
 import Helpers from '../../helpers/helperFunctions';
-import {AppError} from '../../interfaces';
-import {insertAction} from '../DB/functions';
-import {
-  createProject,
-  deleteActivity,
-  deleteProject,
-  getProjects,
-  getProjectTasks,
-  insertActivity,
-  insertProjectTask,
-  updateActivity,
-  updateProject,
-} from '../DB/tasks.controller';
+import TasksDBCtrl from '../DB/tasks.controller';
+import DBFunctions from '../DB/functions';
+import Errors from '../../assets/errors';
 
 const colorRegex = new RegExp(/^\w{6}$/);
 
 export default {
   getProjects: async (req: any, res: Response, next: NextFunction) => {
     try {
-      const projects = await getProjects(req.token.sub);
+      const projects = await ProjectsDBCtrl.getProjects(req.token.sub);
       res.send(projects);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -32,7 +24,7 @@ export default {
 
   insertProject: async (req: any, res: Response, next: NextFunction) => {
     try {
-      const projectID = await createProject(req.token.sub);
+      const projectID = await ProjectsDBCtrl.createProject(req.token.sub);
       res.json({projectID});
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -50,7 +42,13 @@ export default {
         Helpers.sendResponse(res, true, Errors.incognitoError);
         return;
       }
-      await updateProject(req.token.sub, projectID, title, description, color);
+      await ProjectsDBCtrl.updateProject(
+        req.token.sub,
+        projectID,
+        title,
+        description,
+        color
+      );
       res.send();
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -64,7 +62,7 @@ export default {
     try {
       let {projectID} = req.params;
       projectID = parseInt(projectID);
-      await deleteProject(req.token.sub, projectID);
+      await ProjectsDBCtrl.deleteProject(req.token.sub, projectID);
       res.send();
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -77,7 +75,7 @@ export default {
   getProjectTasks: async (req: any, res: Response, next: NextFunction) => {
     try {
       let {projectID} = req.params;
-      const projectTasks = await getProjectTasks(req.token.sub, projectID);
+      const projectTasks = await ProjectsDBCtrl.getProjectTasks(req.token.sub, projectID);
       res.send(projectTasks);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -96,7 +94,7 @@ export default {
         Helpers.sendResponse(res, true, Errors.incognitoError);
         return;
       }
-      const activityID = await insertActivity(
+      const activityID = await TasksDBCtrl.insertActivity(
         req.token.sub,
         activity,
         color,
@@ -104,9 +102,9 @@ export default {
         startDate,
         finalDate
       );
-      const id = await insertProjectTask(projectID, activityID);
+      const id = await ProjectsDBCtrl.insertProjectTask(projectID, activityID);
       res.json({id});
-      insertAction(req.token.sub, 'insert', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'insert', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
@@ -122,7 +120,7 @@ export default {
         Helpers.sendResponse(res, true, Errors.incognitoError);
         return;
       }
-      await updateActivity(
+      await TasksDBCtrl.updateActivity(
         req.token.sub,
         activityID,
         activity,
@@ -132,7 +130,7 @@ export default {
         finalDate
       );
       res.send();
-      insertAction(req.token.sub, 'update', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'update', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
@@ -144,9 +142,9 @@ export default {
   deleteProjectTask: async (req: any, res: Response, next: NextFunction) => {
     try {
       let {activityID} = req.params;
-      await deleteActivity(req.token.sub, activityID);
+      await TasksDBCtrl.deleteActivity(req.token.sub, activityID);
       res.send();
-      insertAction(req.token.sub, 'done', req.ip, req.url);
+      DBFunctions.insertAction(req.token.sub, 'done', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
