@@ -5,8 +5,7 @@ import RoutinesDBCtrl from '../DB/routines.controller';
 import Helpers from '../../helpers/helperFunctions';
 import DBFunctions from '../DB/functions';
 import Errors from '../../assets/errors';
-
-const colorRegex = new RegExp(/^\w{6}$/);
+import {colorRegex} from '../../helpers/helperVariables';
 
 export default {
   getRoutineTasks: async (req: any, res: Response, next: NextFunction) => {

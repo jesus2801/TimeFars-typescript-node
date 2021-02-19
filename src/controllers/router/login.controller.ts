@@ -1,12 +1,10 @@
 import {NextFunction, Request, Response} from 'express';
-import jwt from 'jsonwebtoken';
 
 import Helpers from '../../helpers/helperFunctions';
 import Validates from '../../helpers/validateFunctions';
 import {validLoginUser} from '../DB/login.controller';
 import {AppError} from '../../interfaces/index.interfaces';
 import Errors from '../../assets/errors';
-import Config from '../../config/config';
 
 export default {
   mainView: async (req: Request, res: Response, next: NextFunction) => {
@@ -20,29 +18,24 @@ export default {
     }
   },
 
-  postCtrl: async (req: Request, res: Response, next: NextFunction) => {
+  postCtrl: async (req: any, res: Response, next: NextFunction) => {
     try {
       let {mail, pass} = req.body;
       if (!Validates.validEmail(mail)) {
         Helpers.sendResponse(res, true, Errors.invalidField('Correo'));
+        return;
       }
       const isValidUser: any = await validLoginUser(mail, pass);
       if (isValidUser) {
         const verified = Object.values(isValidUser.verified)[0] == 1 ? true : false;
-        const token = jwt.sign(
-          {
-            sub: isValidUser.userID,
-            name: isValidUser.userName,
-            avatar: 'n-1',
-            verified: verified,
-          },
-          Config.secretKey,
-          {expiresIn: '2d'}
-        );
-        res.cookie('token', token, {
-          httpOnly: true,
-          expires: new Date(Date.now() + 86400000),
-        });
+        const token = {
+          sub: isValidUser.userID,
+          name: isValidUser.userName,
+          avatar: 'n-1',
+          verified: verified,
+        };
+
+        req.session.token = token;
         res.redirect('/home');
         return;
       }

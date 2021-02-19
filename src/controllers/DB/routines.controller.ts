@@ -6,7 +6,7 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL name(?)', []);
+        await conn.query('CALL getRoutines(?)', [userID]);
         conn.release();
         resolved();
       } catch (e) {
@@ -21,7 +21,7 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL name(?)', []);
+        await conn.query('CALL createRoutine(?, ?)', [userID, new Date()]);
         conn.release();
         resolved();
       } catch (e) {
@@ -42,7 +42,13 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL name(?)', []);
+        await conn.query('CALL updateRoutine(?,?,?,?,?)', [
+          routineID,
+          userID,
+          title,
+          description,
+          active,
+        ]);
         conn.release();
         resolved();
       } catch (e) {
@@ -60,7 +66,7 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL name(?)', []);
+        await conn.query('CALL deleteRoutine(?,?)', [routineID, userID]);
         conn.release();
         resolved();
       } catch (e) {
@@ -78,7 +84,7 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL name(?)', []);
+        await conn.query('CALL getRoutineTasks(?,?)', [userID, routineID]);
         conn.release();
         resolved();
       } catch (e) {
@@ -101,7 +107,15 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL name(?)', []);
+        await conn.query('CALL insert_daily_activity(?,?,?,?,?,?,?)', [
+          routineID,
+          activity,
+          done,
+          color,
+          importance,
+          startTime,
+          finalTime,
+        ]);
         conn.release();
         resolved();
       } catch (e) {
@@ -124,7 +138,15 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL name(?)', []);
+        await conn.query('CALL update_daily_activity(?,?,?,?,?,?)', [
+          daily_activityID,
+          activity,
+          done,
+          color,
+          importance,
+          startTime,
+          finalTime,
+        ]);
         conn.release();
         resolved();
       } catch (e) {
@@ -142,7 +164,7 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL name(?)', []);
+        await conn.query('CALL deleteDailyActivity(?,?)', [userID, acticityID]);
         conn.release();
         resolved();
       } catch (e) {
@@ -150,6 +172,4 @@ export default {
       }
     });
   },
-
-  //---------------------------------------------------------------------
 };

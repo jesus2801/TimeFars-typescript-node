@@ -4,7 +4,7 @@ import {AppError} from '../../interfaces/index.interfaces';
 export default {
   mainView: (req: Request, res: Response, next: NextFunction) => {
     try {
-      res.render('404', {
+      res.status(404).render('404', {
         title: 'TimeFars - 404',
       });
     } catch (e) {

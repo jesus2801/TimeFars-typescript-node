@@ -8,9 +8,11 @@ export default {
     //@ts-ignore
     if (Validates.isEmpty(...Object.values(req.body))) {
       Helpers.sendResponse(res, true, Errors.emptyField);
+      return;
     }
     for (const property in req.body) {
-      req.body[property] = property.trim();
+      req.body[property] = req.body[property].trim();
     }
+    next();
   },
 };

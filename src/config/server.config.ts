@@ -1,11 +1,12 @@
 //nodejs modules
 import express, {Application, urlencoded, json} from 'express';
 import {initialize, session} from 'passport';
-import cookieSession from 'cookie-session';
+import expressSession from 'express-session';
 import cookieParser from 'cookie-parser';
 import exHbs from 'express-handlebars';
 import compression from 'compression';
 import helmet from 'helmet';
+import morgan from 'morgan';
 
 //modules
 import ErrorsCtrl from '../controllers/router/errors.controller';
@@ -31,6 +32,9 @@ export class App {
     this.app.set(`views`, path.join(__dirname, `../views`));
     this.app.set('port', process.env.PORT || this.port || 3000);
     this.app.set('view engine', '.hbs');
+    if (process.env.STATE! != 'dev') {
+      this.app.set('trust proxy', 1);
+    }
     this.app.engine(
       '.hbs',
       exHbs({
@@ -49,13 +53,18 @@ export class App {
     this.app.use(json({limit: 5242880}));
     this.app.use(cookieParser());
     this.app.use(
-      cookieSession({
-        name: 'session',
-        keys: ['key1', 'key2'],
+      expressSession({
+        secret: process.env.EXPRESS_SESSION_SECRET!,
+        resave: true,
+        saveUninitialized: false,
+        cookie: {secure: process.env.STATE! == 'dev' ? false : true, maxAge: 28800000},
       })
     );
     this.app.use(initialize()); //passport
     this.app.use(session()); //passport
+    //---DEV---
+    this.app.use(morgan('dev'));
+    //---DEV---
   }
   routes() {
     this.app.use(mainRoutes);

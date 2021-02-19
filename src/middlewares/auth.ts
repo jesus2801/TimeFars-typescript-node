@@ -1,20 +1,15 @@
-import {Request,Response, NextFunction} from 'express';
-import jwt from 'jsonwebtoken';
+import {Request, Response, NextFunction} from 'express';
 
 import Helpers from '../helpers/helperFunctions';
 import {validLoginUser} from '../controllers/DB/login.controller';
 import {insertUser} from '../controllers/DB/signup.controller';
 import {sendMail} from '../config/nodeMailer.setup';
 import {AppError} from '../interfaces/index.interfaces';
-import Config from '../config/config';
 
 export default {
   authCallback: async (req: any, res: Response, next: NextFunction) => {
     try {
-      res.cookie('token', req.user.token, {
-        httpOnly: true,
-        expires: new Date(Date.now() + 86400000),
-      });
+      req.session.token = req.user.token;
       res.redirect('/home');
     } catch (e) {
       const err = new AppError(e, req);
@@ -27,15 +22,12 @@ export default {
       try {
         const isUser: any = await validLoginUser(profile._json.email, id);
         if (isUser) {
-          const token = jwt.sign(
-            {
-              sub: isUser.userID,
-              name: isUser.userName,
-              avatar: 'n-1',
-            },
-            Config.secretKey,
-            {expiresIn: '2d'}
-          );
+          const token = {
+            sub: isUser.userID,
+            name: isUser.userName,
+            avatar: 'n-1',
+            verified: true,
+          };
           profile.token = token;
           resolved(profile);
           return;
@@ -48,15 +40,12 @@ export default {
           hash,
           code
         );
-        const token = jwt.sign(
-          {
-            sub: userID,
-            name: profile.displayName,
-            avatar: 'n-1',
-          },
-          Config.secretKey,
-          {expiresIn: '2d'}
-        );
+        const token = {
+          sub: userID,
+          name: profile.displayName,
+          avatar: 'n-1',
+          verified: true,
+        };
         profile.token = token;
         resolved(profile);
         await sendMail(
@@ -69,31 +58,32 @@ export default {
       }
     });
   },
-  verifyToken: async function(req: Request, res: Response, next: NextFunction) {
+
+  verifyToken: async function (req: any, res: Response, next: NextFunction) {
     try {
-      const cookieToken = req.cookies['token'];
-      const token: any = await jwt.verify(cookieToken, Config.secretKey);
-      if (token.verified !== true) {
-        res.redirect('/unverifiedEmail');
-        return;
+      const cookieToken = req.session.token;
+      if (cookieToken) {
+        if (cookieToken.verified) {
+          req.token = req.session.token;
+          return next();
+        }
       }
-      //@ts-ignore
-      req.token = token;
-      next();
+      res.redirect('/login');
     } catch (e) {
       res.redirect('/login');
     }
   },
-  
-  verifyUser: async function(req: Request, res: Response, next: NextFunction) {
+
+  verifyUser: async function (req: any, res: Response, next: NextFunction) {
     try {
-      const cookieToken = req.cookies['token'];
-      const token = await jwt.verify(cookieToken, Config.secretKey);
-      //@ts-ignore
-      req.token = token;
-      next();
+      const cookieToken = req.session.token;
+      if (cookieToken) {
+        req.token = req.session.token;
+        return next();
+      }
+      res.redirect('/login');
     } catch (e) {
       res.redirect('/login');
     }
-  }
+  },
 };

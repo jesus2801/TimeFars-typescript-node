@@ -6,8 +6,7 @@ import Helpers from '../../helpers/helperFunctions';
 import TasksDBCtrl from '../DB/tasks.controller';
 import DBFunctions from '../DB/functions';
 import Errors from '../../assets/errors';
-
-const colorRegex = new RegExp(/^\w{6}$/);
+import { colorRegex } from '../../helpers/helperVariables';
 
 export default {
   getProjects: async (req: any, res: Response, next: NextFunction) => {

@@ -1,17 +1,15 @@
 import {NextFunction, Response} from 'express';
-import jwt from 'jsonwebtoken';
 
 import {getCode, getEmail, validateEmailDB} from '../DB/auth.controller';
 import Helpers from '../../helpers/helperFunctions';
 import {sendMail} from '../../config/nodeMailer.setup';
 import {AppError} from '../../interfaces/index.interfaces';
-import Config from '../../config/config';
 
 export default {
   unverifiedEmail: async (req: any, res: Response, next: NextFunction) => {
     try {
       const email = await getEmail(req.token.sub);
-      res.render('app/unverifiedEmail', {
+      res.status(200).render('app/unverifiedEmail', {
         title: 'TimeFars - Verificar Correo',
         email,
       });
@@ -63,20 +61,13 @@ export default {
         res.redirect('/');
         return;
       }
-      const newToken = jwt.sign(
-        {
-          sub: req.token.sub,
-          name: req.token.name,
-          avatar: req.token.avatar,
-          verified: true,
-        },
-        Config.secretKey,
-        {expiresIn: '2d'}
-      );
-      res.cookie('token', newToken, {
-        httpOnly: true,
-        expires: new Date(Date.now() + 86400000),
-      });
+      const newToken = {
+        sub: req.token.sub,
+        name: req.token.name,
+        avatar: req.token.avatar,
+        verified: true,
+      };
+      req.session.token = newToken;
       res.redirect('/home');
     } catch (e) {
       const err = new AppError(e, req);
@@ -86,7 +77,7 @@ export default {
 
   logout: (req: any, res: Response, next: NextFunction) => {
     try {
-      res.clearCookie('token');
+      req.session.destroy();
       res.redirect('/');
     } catch (e) {
       const err = new AppError(e, req);

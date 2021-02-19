@@ -28,3 +28,5 @@ export const alphabet = [
     '$', 
     '-',
 ]
+
+export const colorRegex = new RegExp(/^\w{6}$/);
