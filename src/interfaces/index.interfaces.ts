@@ -12,6 +12,6 @@ export class AppError {
     this.userID = id;
   }
   report() {
-    console.log('Error reportado');
+    console.log(this.err);
   }
 }

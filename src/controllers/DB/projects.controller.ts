@@ -6,9 +6,9 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL getProjects(?)', [userID]);
+        const [[query]]: any = await conn.query('CALL getProjects(?)', [userID]);
         conn.release();
-        resolved();
+        resolved(query);
       } catch (e) {
         reject(e);
       }
@@ -45,7 +45,7 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL updateProject(?,?,?,?,?)', [
+        await conn.query('CALL updateProject(?,?,?,?,?,?)', [
           userID,
           projectID,
           title,
@@ -84,13 +84,16 @@ export default {
   getProjectTasks: function (
     userID: number | string,
     projectID: number | string
-  ): Promise<void> {
-    return new Promise<void>(async (resolved, reject) => {
+  ): Promise<any> {
+    return new Promise<any>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL getProjectTasks(?,?)', [userID, projectID]);
+        const [[projects]]: any = await conn.query('CALL getProjectTasks(?,?)', [
+          userID,
+          projectID,
+        ]);
         conn.release();
-        resolved();
+        resolved(projects);
       } catch (e) {
         reject(e);
       }

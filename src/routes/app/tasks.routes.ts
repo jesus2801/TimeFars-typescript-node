@@ -47,6 +47,16 @@ router.delete(
   ProjectsCtrl.deleteProjectTask
 );
 
+router.post('/getRoutines', Auth.verifyToken, RoutinesCtrl.getRoutines);
+router.post('/createRoutine', Auth.verifyToken, RoutinesCtrl.createRoutine);
+router.put(
+  '/updateRoutine',
+  ValidateMW.emptyField,
+  Auth.verifyToken,
+  RoutinesCtrl.updateRoutine
+);
+router.delete('/deleteRoutine/:routineID', Auth.verifyToken, RoutinesCtrl.deleteRoutine);
+
 router.post(
   '/getRoutineTasks/:routineID',
   Auth.verifyToken,
@@ -69,15 +79,5 @@ router.delete(
   Auth.verifyToken,
   RoutinesCtrl.deleteRoutineTask
 );
-
-router.post('/getRoutines', Auth.verifyToken, RoutinesCtrl.getRoutines);
-router.post('/createRoutine', Auth.verifyToken, RoutinesCtrl.createRoutine);
-router.put(
-  '/updateRoutine',
-  ValidateMW.emptyField,
-  Auth.verifyToken,
-  RoutinesCtrl.updateRoutine
-);
-router.delete('/deleteRoutine/:routineID', Auth.verifyToken, RoutinesCtrl.deleteRoutine);
 
 export default router;

@@ -6,9 +6,9 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL getRoutines(?)', [userID]);
+        const [[routines]]: any = await conn.query('CALL getRoutines(?)', [userID]);
         conn.release();
-        resolved();
+        resolved(routines);
       } catch (e) {
         reject(e);
       }
@@ -80,13 +80,16 @@ export default {
   getRoutineTasks: function (
     userID: number | string,
     routineID: number | string
-  ): Promise<void> {
-    return new Promise<void>(async (resolved, reject) => {
+  ): Promise<any> {
+    return new Promise<any>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL getRoutineTasks(?,?)', [userID, routineID]);
+        const [[tasks]]: any = await conn.query('CALL getRoutineTasks(?,?)', [
+          userID,
+          routineID,
+        ]);
         conn.release();
-        resolved();
+        resolved(tasks);
       } catch (e) {
         reject(e);
       }
@@ -101,8 +104,8 @@ export default {
     done: 0 | 1,
     color: string,
     importance: 'i-1' | 'i-2' | '1-3' | 'i-4',
-    startTime: Date,
-    finalTime: Date
+    startTime: string,
+    finalTime: string
   ): Promise<void> {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
@@ -138,7 +141,7 @@ export default {
     return new Promise<void>(async (resolved, reject) => {
       const conn: PoolConnection = await connect();
       try {
-        await conn.query('CALL update_daily_activity(?,?,?,?,?,?)', [
+        await conn.query('CALL update_daily_activity(?,?,?,?,?,?,?)', [
           daily_activityID,
           activity,
           done,

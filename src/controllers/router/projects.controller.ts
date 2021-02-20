@@ -6,7 +6,7 @@ import Helpers from '../../helpers/helperFunctions';
 import TasksDBCtrl from '../DB/tasks.controller';
 import DBFunctions from '../DB/functions';
 import Errors from '../../assets/errors';
-import { colorRegex } from '../../helpers/helperVariables';
+import {colorRegex} from '../../helpers/helperVariables';
 
 export default {
   getProjects: async (req: any, res: Response, next: NextFunction) => {
@@ -48,7 +48,7 @@ export default {
         description,
         color
       );
-      res.send();
+      res.send({error: false});
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
@@ -62,7 +62,7 @@ export default {
       let {projectID} = req.params;
       projectID = parseInt(projectID);
       await ProjectsDBCtrl.deleteProject(req.token.sub, projectID);
-      res.send();
+      res.send({error: false});
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
       return next(err);
@@ -119,6 +119,8 @@ export default {
         Helpers.sendResponse(res, true, Errors.incognitoError);
         return;
       }
+      startDate = new Date(startDate);
+      finalDate = new Date(finalDate);
       await TasksDBCtrl.updateActivity(
         req.token.sub,
         activityID,
@@ -128,7 +130,7 @@ export default {
         startDate,
         finalDate
       );
-      res.send();
+      res.send({error: false});
       DBFunctions.insertAction(req.token.sub, 'update', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
@@ -142,7 +144,7 @@ export default {
     try {
       let {activityID} = req.params;
       await TasksDBCtrl.deleteActivity(req.token.sub, activityID);
-      res.send();
+      res.send({error: false});
       DBFunctions.insertAction(req.token.sub, 'done', req.ip, req.url);
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);
