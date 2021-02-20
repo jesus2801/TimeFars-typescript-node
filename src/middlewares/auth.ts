@@ -1,16 +1,15 @@
-import {Request, Response, NextFunction} from 'express';
+import {Response, NextFunction} from 'express';
 
 import Helpers from '../helpers/helperFunctions';
 import {validLoginUser} from '../controllers/DB/login.controller';
 import {insertUser} from '../controllers/DB/signup.controller';
-import {sendMail} from '../config/nodeMailer.setup';
 import {AppError} from '../interfaces/index.interfaces';
 
 export default {
   authCallback: async (req: any, res: Response, next: NextFunction) => {
     try {
       req.session.token = req.user.token;
-      res.redirect('/home');
+      res.redirect('/app/home');
     } catch (e) {
       const err = new AppError(e, req);
       return next(err);
@@ -48,11 +47,6 @@ export default {
         };
         profile.token = token;
         resolved(profile);
-        await sendMail(
-          profile._json.email,
-          'verificar correo TimeFars',
-          Helpers.generateEmailHTML(profile.displayName, code)
-        );
       } catch (e) {
         reject(e);
       }

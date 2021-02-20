@@ -68,7 +68,7 @@ export default {
         verified: true,
       };
       req.session.token = newToken;
-      res.redirect('/home');
+      res.redirect('/app/home');
     } catch (e) {
       const err = new AppError(e, req);
       return next(err);

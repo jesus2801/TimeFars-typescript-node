@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 //modules
+import {LoginSignupRateLimiter, AppRateLimiter} from '../middlewares/rateLimiter';
 import ErrorsCtrl from '../controllers/router/errors.controller';
 import NotFoundCtrl from '../controllers/router/404.controller';
 import tasksRoutes from '../routes/app/tasks.routes';
@@ -33,7 +34,7 @@ export class App {
     this.app.set('port', process.env.PORT || this.port || 3000);
     this.app.set('view engine', '.hbs');
     if (process.env.STATE! != 'dev') {
-      this.app.set('trust proxy', 1);
+      this.app.set('trust proxy', true);
     }
     this.app.engine(
       '.hbs',
@@ -47,7 +48,33 @@ export class App {
     );
   }
   middlewares() {
-    this.app.use(helmet());
+    this.app.use(
+      helmet.contentSecurityPolicy({
+        directives: {
+          'default-src': ["'self'", 'https://fonts.googleapis.com'],
+          'base-uri': ["'self'"],
+          'block-all-mixed-content': [],
+          'font-src': ["'self'", 'https://fonts.gstatic.com'],
+          'img-src': ["'self'"],
+          'object-src': ["'self'"],
+          'script-src': ["'self'", 'https://cdn.jsdelivr.net'],
+          // 'script-src-attr': ["'none'"],
+          'style-src': ["'self'", 'https:', "'unsafe-inline'"],
+          'upgrade-insecure-requests': [],
+        },
+      })
+    );
+    this.app.use(helmet.dnsPrefetchControl());
+    this.app.use(helmet.expectCt());
+    this.app.use(helmet.frameguard());
+    this.app.use(helmet.hidePoweredBy());
+    this.app.use(helmet.hsts());
+    this.app.use(helmet.ieNoOpen());
+    this.app.use(helmet.noSniff());
+    this.app.use(helmet.permittedCrossDomainPolicies());
+    this.app.use(helmet.referrerPolicy());
+    this.app.use(helmet.xssFilter());
+    this.app.use('/app', AppRateLimiter);
     this.app.use(compression());
     this.app.use(urlencoded({extended: false, limit: 5242880}));
     this.app.use(json({limit: 5242880}));
@@ -68,8 +95,8 @@ export class App {
   }
   routes() {
     this.app.use(mainRoutes);
-    this.app.use(homeRoute);
-    this.app.use('/tasks', tasksRoutes);
+    this.app.use('/app', homeRoute);
+    this.app.use('/app/tasks', tasksRoutes);
   }
   extra() {
     this.app.use(express.static(path.join(__dirname, '../public')));

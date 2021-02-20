@@ -41,7 +41,7 @@ export default {
         verified: false,
       };
       req.session.token = token;
-      res.redirect('/home');
+      res.redirect('/app/home');
       sendMail(
         email,
         'verificar correo TimeFars',

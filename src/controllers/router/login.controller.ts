@@ -11,6 +11,11 @@ export default {
     try {
       res.status(200).render('out/login', {
         title: 'TimeFars - Ingresar',
+        styles: [{style: `<link rel="stylesheet" href="/styles/login.min.css">`}],
+        scripts: [
+          {script: `<script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>`},
+          {script: `<script src="/js/login/login.js"></script>`},
+        ],
       });
     } catch (e) {
       const err = new AppError(e, req);
@@ -36,7 +41,7 @@ export default {
         };
 
         req.session.token = token;
-        res.redirect('/home');
+        res.send({error: false});
         return;
       }
       Helpers.sendResponse(res, true, Errors.invalidCredentials);
