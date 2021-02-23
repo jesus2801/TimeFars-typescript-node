@@ -13,6 +13,11 @@ export default {
     try {
       res.status(200).render('out/signup', {
         title: 'TimeFars - Registro',
+        styles: [{style: `<link rel="stylesheet" href="/styles/loginSignup.min.css">`}],
+        scripts: [
+          {script: `<script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>`},
+          {script: `<script src="/js/dist/signup.js"></script>`},
+        ],
       });
     } catch (e) {
       const err = new AppError(e, req);
@@ -41,7 +46,7 @@ export default {
         verified: false,
       };
       req.session.token = token;
-      res.redirect('/app/home');
+      res.send({error: false});
       sendMail(
         email,
         'verificar correo TimeFars',

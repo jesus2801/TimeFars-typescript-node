@@ -60,6 +60,8 @@ export default {
         if (cookieToken.verified) {
           req.token = req.session.token;
           return next();
+        } else {
+          return res.redirect('/unverifiedEmail');
         }
       }
       res.redirect('/login');

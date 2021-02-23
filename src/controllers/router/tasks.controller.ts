@@ -13,6 +13,16 @@ export default {
     try {
       res.status(200).render('app/tasks', {
         title: 'TimeFars - Tasks',
+        styles: [{style: `<link rel="stylesheet" href="/styles/app.min.css">`}],
+        scripts: [
+          // {script: `<script src="/js/dist/loader.js"></script>`},
+          {script: `<script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>`},
+          // {
+          //   script: `<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.13.0/Sortable.min.js" integrity="sha512-5x7t0fTAVo9dpfbp3WtE2N6bfipUwk7siViWncdDoSz2KwOqVC1N9fDxEOzk0vTThOua/mglfF8NO7uVDLRC8Q==" crossorigin="anonymous"></script>`,
+          // },
+          {script: `<script src="/js/dist/app.js" defer></script>`},
+        ],
+        userName: req.token.name,
       });
     } catch (e) {
       const err = new AppError(e, req, req.token.sub);

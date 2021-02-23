@@ -1,1 +1,37 @@
-<h1>Hello world in signup</h1>
+<a href="/" class="return">
+    <img src="/images/icons/login/arrow-right.png">
+</a>
+<div class="main-ctn">
+    <div class="background-ctn">
+        <div class="info-ctn">
+            <h2>¿Ya tienes una cuenta?</h2>
+            <p>¡Te invitamos a iniciar sesion para comenzar a disfrutar
+                de las diversas y maravillosas funciones de TimeFars!
+            </p>
+            <a href="/login">
+                <button>Ingresar</button>
+            </a>
+        </div>
+    </div>
+    <div class="form-ctn">
+        <h2>Bienvenido</h2>
+        <div class="form-group">
+            <object data="/images/icons/login/user.svg" type="image/svg+xml" class="name-icon"></object>
+            <input type="text" placeholder="Nombre" id="name">
+        </div>
+        <div class="form-group">
+            <object data="/images/icons/login/email.svg" type="image/svg+xml" class="mail-icon"></object>
+            <input type="text" placeholder="Correo electronico" id="email">
+        </div>
+        <div class="form-group">
+            <object data="/images/icons/login/pass.svg" type="image/svg+xml" class="pass-icon"></object>
+            <input type="password" placeholder="Contraseña" id="pass">
+        </div>
+        <div class="form-group">
+            <object data="/images/icons/login/pass.svg" type="image/svg+xml" class="pass-icon"></object>
+            <input type="password" placeholder="Confirmar contraseña" id="pass2">
+        </div>
+        {{> continueWith}}
+        <button class="submit">Registrarse</button>
+    </div>
+</div>

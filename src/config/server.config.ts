@@ -9,9 +9,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 //modules
-import {LoginSignupRateLimiter, AppRateLimiter} from '../middlewares/rateLimiter';
 import ErrorsCtrl from '../controllers/router/errors.controller';
 import NotFoundCtrl from '../controllers/router/404.controller';
+import {AppRateLimiter} from '../middlewares/rateLimiter';
 import tasksRoutes from '../routes/app/tasks.routes';
 import homeRoute from '../routes/app/home.routes';
 import mainRoutes from '../routes/index.routes';
@@ -57,7 +57,11 @@ export class App {
           'font-src': ["'self'", 'https://fonts.gstatic.com'],
           'img-src': ["'self'"],
           'object-src': ["'self'"],
-          'script-src': ["'self'", 'https://cdn.jsdelivr.net'],
+          'script-src': [
+            "'self'",
+            'https://cdn.jsdelivr.net',
+            'https://cdnjs.cloudflare.com',
+          ],
           // 'script-src-attr': ["'none'"],
           'style-src': ["'self'", 'https:', "'unsafe-inline'"],
           'upgrade-insecure-requests': [],
@@ -89,9 +93,7 @@ export class App {
     );
     this.app.use(initialize()); //passport
     this.app.use(session()); //passport
-    //---DEV---
     this.app.use(morgan('dev'));
-    //---DEV---
   }
   routes() {
     this.app.use(mainRoutes);

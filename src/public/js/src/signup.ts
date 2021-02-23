@@ -1,5 +1,5 @@
 class UserInterface {
-  loader: any;
+  private loader: any;
   showErrorMessage(message: string) {
     //@ts-ignore
     return Swal.fire('¡Error!', message, 'error');
@@ -19,16 +19,18 @@ class UserInterface {
   }
 }
 
-// global scope
-const emailInput: HTMLInputElement = <HTMLInputElement>document.getElementById('email'),
-  passInput: HTMLInputElement = <HTMLInputElement>document.getElementById('pass'),
-  formButton: HTMLButtonElement = <HTMLButtonElement>document.querySelector('.submit'),
-  emailRegex = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
+const nameInput: HTMLInputElement = document.getElementById('name') as HTMLInputElement,
+  emailInput: HTMLInputElement = document.getElementById('email') as HTMLInputElement,
+  passInput: HTMLInputElement = document.getElementById('pass') as HTMLInputElement,
+  pass2Input: HTMLInputElement = document.getElementById('pass2') as HTMLInputElement,
+  formButton: HTMLButtonElement = document.querySelector('.submit') as HTMLButtonElement,
+  emailRegex: RegExp = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
   errors = {
     incognitoError:
       'Lo sentimos, ha ocurrido un error, porfavor intente de nuevo o en su defecto más tarde.',
     invalidEmail: 'El correo electronico ingresado es inválido',
     invalidField: 'Por favor rellene correctamente todos los campos.',
+    differentsPass: 'Las contraseñas ingresadas no coinciden.',
   },
   UI = new UserInterface();
 
@@ -36,39 +38,39 @@ window.addEventListener('load', () =>
   document.querySelector('.main-ctn')!.classList.add('active')
 );
 emailInput.addEventListener('change', verifyMailValue);
-formButton.addEventListener('click', () => {
-  const user = new User(emailInput.value.trim(), passInput.value.trim());
-  if (!user.validateFields()) {
-    return UI.showErrorMessage(errors.invalidField);
-  }
-  if (!user.validateEmail()) {
-    return UI.showErrorMessage(errors.invalidEmail);
-  }
-  return user.verifyCredentials();
-});
+formButton.addEventListener('click', validateAndSubmitForm);
 
 class User {
+  name: string;
   email: string;
   pass: string;
-  formData: FormData;
+  pass2: string;
+  private formData: FormData;
 
-  constructor(email: string, pass: string) {
+  constructor(name: string, email: string, pass: string, pass2: string) {
+    this.name = name;
     this.email = email;
     this.pass = pass;
+    this.pass2 = pass2;
     this.formData = new FormData();
-    this.formData.append('mail', this.email);
+    this.formData.append('name', this.name);
+    this.formData.append('email', this.email);
     this.formData.append('pass', this.pass);
   }
 
-  validateFields() {
-    return this.email === '' || this.pass === '' ? false : true;
+  public validateFields() {
+    return !isEmpty(this.name, this.email, this.pass, this.pass2);
   }
 
-  validateEmail() {
+  public validateEmail() {
     return emailRegex.test(this.email);
   }
 
-  verifyCredentials() {
+  public verifyPass() {
+    return this.pass === this.pass2;
+  }
+
+  public verifyCredentials() {
     UI.showLoading();
     fetch(window.location.href, {
       method: 'POST',
@@ -104,7 +106,30 @@ function verifyMailValue() {
   emailInput.classList.remove('error');
 }
 
+function validateAndSubmitForm() {
+  const user = new User(
+    nameInput.value.trim(),
+    emailInput.value.trim(),
+    passInput.value.trim(),
+    pass2Input.value.trim()
+  );
+  if (!user.validateFields()) {
+    return UI.showErrorMessage(errors.invalidField);
+  }
+  if (!user.validateEmail()) {
+    return UI.showErrorMessage(errors.invalidEmail);
+  }
+  if (!user.verifyPass()) {
+    return UI.showErrorMessage(errors.differentsPass);
+  }
+  return user.verifyCredentials();
+}
+
 // tasks functions
 function validEmail(email: string): Boolean {
   return emailRegex.test(email);
+}
+
+function isEmpty(...strings: string[]) {
+  return strings.some(str => str === '');
 }

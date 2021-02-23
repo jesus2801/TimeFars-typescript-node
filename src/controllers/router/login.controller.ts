@@ -11,10 +11,10 @@ export default {
     try {
       res.status(200).render('out/login', {
         title: 'TimeFars - Ingresar',
-        styles: [{style: `<link rel="stylesheet" href="/styles/login.min.css">`}],
+        styles: [{style: `<link rel="stylesheet" href="/styles/loginSignup.min.css">`}],
         scripts: [
           {script: `<script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>`},
-          {script: `<script src="/js/login/login.js"></script>`},
+          {script: `<script src="/js/dist/login.js"></script>`},
         ],
       });
     } catch (e) {
