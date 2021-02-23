@@ -65,6 +65,22 @@ var NavInterface = /** @class */ (function () {
         this.projectsDropDown.classList.toggle('active');
         this.projects.classList.toggle('active');
     };
+    NavInterface.prototype.printRoutine = function (routineName, id, color, desc) {
+        var routine = document.createElement('li');
+        routine.classList.add('routine');
+        routine.dataset.id = id.toString();
+        routine.dataset.desc = desc;
+        routine.innerHTML = "<span style=\"background-color: #" + color + "\"></span>" + routineName;
+        this.routines.insertBefore(routine, this.routines.querySelector('.add-routine'));
+    };
+    NavInterface.prototype.printProject = function (projectName, id, color, desc) {
+        var project = document.createElement('li');
+        project.classList.add('project');
+        project.dataset.id = id.toString();
+        project.dataset.desc = desc;
+        project.innerHTML = "<span style=\"background-color: #" + color + "\"></span>" + projectName;
+        this.projects.insertBefore(project, this.projects.querySelector('.add-project'));
+    };
     return NavInterface;
 }());
 var TasksInterface = /** @class */ (function (_super) {
@@ -114,7 +130,8 @@ var UserInterface = /** @class */ (function (_super) {
     function UserInterface() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this.errors = {
-            incognitoError: 'Lo sentimos ha ocurrido un error.'
+            incognitoError: 'Lo sentimos ha ocurrido un error.',
+            cannotUpdate: 'Lo sentimos, no hemos podido actualizar tu información, te invitamos a volverlo a intentar, o en su defecto más tarde.'
         };
         return _this;
     }
@@ -135,6 +152,8 @@ var UserInterface = /** @class */ (function (_super) {
     UserInterface.prototype.removeLoader = function () {
         this.loader.close();
     };
+    UserInterface.prototype.showUpdating = function () { };
+    UserInterface.prototype.removeUpdating = function () { };
     return UserInterface;
 }(TasksInterface));
 //------GLOBAL SCOPE------
@@ -147,6 +166,18 @@ var ServerConn = /** @class */ (function () {
             getTask: {
                 rute: '/app/tasks/getTasks',
                 method: 'POST'
+            },
+            getRoutines: {
+                rute: '/app/tasks/getRoutines',
+                method: 'POST'
+            },
+            getProjects: {
+                rute: '/app/tasks/getProjects',
+                method: 'POST'
+            },
+            deleteTask: {
+                rute: '/app/tasks/delete',
+                method: 'DELETE'
             }
         };
     }
@@ -214,10 +245,47 @@ var ServerConn = /** @class */ (function () {
             });
         });
     };
+    ServerConn.prototype.printRoutinesAndProjects = function () {
+        fetch(this.routes.getProjects.rute, {
+            method: this.routes.getProjects.method
+        })
+            .then(function (res) { return res.json(); })["catch"](function () { return UI.showErrorMessage(UI.errors.incognitoError); })
+            .then(function (projects) {
+            if (projects.length === 0)
+                return;
+            projects.forEach(function (project) {
+                UI.printProject(project.title, project.projectID, project.color, project.description);
+            });
+        });
+        fetch(this.routes.getRoutines.rute, {
+            method: this.routes.getRoutines.method
+        })
+            .then(function (res) { return res.json(); })["catch"](function () { return UI.showErrorMessage(UI.errors.incognitoError); })
+            .then(function (routines) {
+            if (routines.length === 0)
+                return;
+            routines.forEach(function (routine) {
+                UI.printRoutine(routine.title, routine.routineID, routine.color, routine.description);
+            });
+        });
+    };
+    ServerConn.prototype.deleteTask = function (taskID) {
+        UI.showUpdating();
+        fetch(this.routes.deleteTask.rute + ("/" + taskID), {
+            method: this.routes.deleteTask.method
+        })
+            .then(function (res) { return res.json(); })["catch"](function () { return UI.showErrorMessage(UI.errors.incognitoError); })
+            .then(function (res) {
+            UI.removeUpdating();
+            if (res.error)
+                UI.showErrorMessage(UI.errors.cannotUpdate);
+        });
+    };
     return ServerConn;
 }());
 var server = new ServerConn();
 server.printTasks();
+server.printRoutinesAndProjects();
 //----EVENTS-----
 window.addEventListener('load', function () { return UI.removeLoader(); });
 UI.tasksCtn.addEventListener('input', function (e) {
@@ -238,6 +306,7 @@ UI.tasksCtn.addEventListener('keydown', function (e) {
 });
 UI.tasksCtn.addEventListener('click', function (e) {
     if (e.target.classList.contains('circle')) {
+        console.log(e.target.parentNode.parentNode.parentNode.dataset.id);
         UI.doneTask(e.target);
     }
     else if (e.target.classList.contains('importance')) {

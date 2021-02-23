@@ -6,6 +6,7 @@ export default {
     try {
       res.status(404).render('404', {
         title: 'TimeFars - 404',
+        styles: [{style: `<link rel="stylesheet" href="/styles/404.min.css">`}],
       });
     } catch (e) {
       const err = new AppError(e, req);

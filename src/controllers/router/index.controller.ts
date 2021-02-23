@@ -6,6 +6,7 @@ export default {
     try {
       res.status(200).render('index', {
         title: 'TimeFars - Inicio',
+        styles: [{style: `<link rel="stylesheet" href="/styles/index.min.css">`}],
       });
     } catch (e) {
       const err = new AppError(e, req);

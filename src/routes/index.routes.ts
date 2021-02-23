@@ -14,7 +14,7 @@ const router: Router = Router();
 
 router
   .route('/login')
-  .get(LoginCtrl.mainView)
+  .get(Auth.isUser, LoginCtrl.mainView)
   .post(LoginSignupRateLimiter, ValidateMW.emptyField, LoginCtrl.postCtrl);
 router
   .route('/signup')

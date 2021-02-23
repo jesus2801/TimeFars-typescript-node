@@ -117,17 +117,15 @@
         width: 100%;
         border: none;
         padding: 11px 0 11px 17px;
-
         font-size: 14px;
-
         span {
           display: block;
           overflow: visible;
           width: 10px;
+          min-width: 10px;
           min-height: 10px;
           height: 10px;
           border-radius: 100px;
-          background-color: rgb(205, 20, 241);
           margin-right: 8px;
         }
         img {

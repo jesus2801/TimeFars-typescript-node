@@ -82,4 +82,13 @@ export default {
       res.redirect('/login');
     }
   },
+
+  isUser: function (req: any, res: Response, next: NextFunction) {
+    const cookieToken = req.session.token;
+    if (cookieToken) {
+      req.token = req.session.token;
+      return res.redirect('/app/home');
+    }
+    next();
+  },
 };

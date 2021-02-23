@@ -1,13 +1,35 @@
 //---TYPES / INTERFACES-----
 type Importance = 'i-1' | 'i-2' | 'i-3' | 'i-4';
 interface Task {
+  taskID: number;
   activity: string;
-  color: string;
-  creationDate: string;
   importance: Importance;
+  color: string;
   startDate: string;
   finalDate: string;
-  taskID: number;
+  creationDate: string;
+}
+
+interface Project {
+  projectID: 9;
+  title: string;
+  description: string;
+  color: string;
+  creationDate: string;
+}
+
+interface Routine {
+  routineID: 3;
+  active: Object;
+  title: string;
+  description: string;
+  color: string;
+  creationDate: string;
+}
+
+interface ServerRes {
+  error: boolean;
+  message?: string;
 }
 
 class NavInterface {
@@ -37,6 +59,24 @@ class NavInterface {
   public toggleDropDownProjects() {
     this.projectsDropDown.classList.toggle('active');
     this.projects.classList.toggle('active');
+  }
+
+  public printRoutine(routineName: string, id: number, color: string, desc: string) {
+    const routine: HTMLLIElement = document.createElement('li');
+    routine.classList.add('routine');
+    routine.dataset.id = id.toString();
+    routine.dataset.desc = desc;
+    routine.innerHTML = `<span style="background-color: #${color}"></span>${routineName}`;
+    this.routines.insertBefore(routine, this.routines.querySelector('.add-routine'));
+  }
+
+  public printProject(projectName: string, id: number, color: string, desc: string) {
+    const project: HTMLLIElement = document.createElement('li');
+    project.classList.add('project');
+    project.dataset.id = id.toString();
+    project.dataset.desc = desc;
+    project.innerHTML = `<span style="background-color: #${color}"></span>${projectName}`;
+    this.projects.insertBefore(project, this.projects.querySelector('.add-project'));
   }
 }
 
@@ -115,6 +155,8 @@ class UserInterface extends TasksInterface {
   private loader: any;
   public errors = {
     incognitoError: 'Lo sentimos ha ocurrido un error.',
+    cannotUpdate:
+      'Lo sentimos, no hemos podido actualizar tu información, te invitamos a volverlo a intentar, o en su defecto más tarde.',
   };
 
   public showLoader(): void {
@@ -136,6 +178,10 @@ class UserInterface extends TasksInterface {
   public removeLoader(): void {
     this.loader.close();
   }
+
+  public showUpdating(): void {}
+
+  public removeUpdating(): void {}
 }
 
 //------GLOBAL SCOPE------
@@ -148,6 +194,18 @@ class ServerConn {
     getTask: {
       rute: '/app/tasks/getTasks',
       method: 'POST',
+    },
+    getRoutines: {
+      rute: '/app/tasks/getRoutines',
+      method: 'POST',
+    },
+    getProjects: {
+      rute: '/app/tasks/getProjects',
+      method: 'POST',
+    },
+    deleteTask: {
+      rute: '/app/tasks/delete',
+      method: 'DELETE',
     },
   };
 
@@ -200,10 +258,60 @@ class ServerConn {
       );
     });
   }
+
+  public printRoutinesAndProjects(): void {
+    fetch(this.routes.getProjects.rute, {
+      method: this.routes.getProjects.method,
+    })
+      .then(res => res.json())
+      .catch(() => UI.showErrorMessage(UI.errors.incognitoError))
+      .then((projects: Project[]) => {
+        if (projects.length === 0) return;
+        projects.forEach((project: Project) => {
+          UI.printProject(
+            project.title,
+            project.projectID,
+            project.color,
+            project.description
+          );
+        });
+      });
+
+    fetch(this.routes.getRoutines.rute, {
+      method: this.routes.getRoutines.method,
+    })
+      .then(res => res.json())
+      .catch(() => UI.showErrorMessage(UI.errors.incognitoError))
+      .then((routines: Routine[]) => {
+        if (routines.length === 0) return;
+        routines.forEach((routine: Routine) => {
+          UI.printRoutine(
+            routine.title,
+            routine.routineID,
+            routine.color,
+            routine.description
+          );
+        });
+      });
+  }
+
+  public deleteTask(taskID: number | string): void {
+    UI.showUpdating();
+    fetch(this.routes.deleteTask.rute+`/${taskID}`, {
+      method: this.routes.deleteTask.method,
+    })
+      .then(res => res.json())
+      .catch(() => UI.showErrorMessage(UI.errors.incognitoError))
+      .then((res: ServerRes) => {
+        UI.removeUpdating();
+        if (res.error) UI.showErrorMessage(UI.errors.cannotUpdate);
+      });
+  }
 }
 
 const server = new ServerConn();
 server.printTasks();
+server.printRoutinesAndProjects();
 
 //----EVENTS-----
 window.addEventListener('load', () => UI.removeLoader());
@@ -231,6 +339,7 @@ UI.tasksCtn.addEventListener('keydown', (e: any) => {
 
 UI.tasksCtn.addEventListener('click', (e: any) => {
   if (e.target.classList.contains('circle')) {
+    console.log(e.target.parentNode.parentNode.parentNode.dataset.id);
     UI.doneTask(e.target);
   } else if (e.target.classList.contains('importance')) {
     switch (e.target.innerText.trim()) {
