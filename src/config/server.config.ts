@@ -11,8 +11,6 @@ import morgan from 'morgan';
 //modules
 import ErrorsCtrl from '../controllers/router/errors.controller';
 import NotFoundCtrl from '../controllers/router/404.controller';
-import {AppRateLimiter} from '../middlewares/rateLimiter';
-import tasksRoutes from '../routes/app/tasks.routes';
 import homeRoute from '../routes/app/home.routes';
 import mainRoutes from '../routes/index.routes';
 import config from './config';
@@ -78,7 +76,7 @@ export class App {
     this.app.use(helmet.permittedCrossDomainPolicies());
     this.app.use(helmet.referrerPolicy());
     this.app.use(helmet.xssFilter());
-    this.app.use('/app', AppRateLimiter);
+    // this.app.use('/app', AppRateLimiter);
     this.app.use(compression());
     this.app.use(urlencoded({extended: false, limit: 5242880}));
     this.app.use(json({limit: 5242880}));
@@ -98,7 +96,6 @@ export class App {
   routes() {
     this.app.use(mainRoutes);
     this.app.use('/app', homeRoute);
-    this.app.use('/app/tasks', tasksRoutes);
   }
   extra() {
     this.app.use(express.static(path.join(__dirname, '../public')));

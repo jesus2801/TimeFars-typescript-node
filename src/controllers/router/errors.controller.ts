@@ -1,5 +1,4 @@
 import {NextFunction, Request, Response} from 'express';
-import {reportError} from '../../helpers/reportError';
 import {AppError} from '../../interfaces/index.interfaces';
 
 export default {
@@ -10,7 +9,6 @@ export default {
       });
       err.report();
     } catch (e) {
-      //   reportError(e, req.ip, req.url);
       console.log(e);
     }
   },

@@ -8,11 +8,3 @@ export const LoginSignupRateLimiter = rateLimit({
   headers: true,
   statusCode: 429,
 });
-
-export const AppRateLimiter = rateLimit({
-  windowMs: 1000 * 5,
-  max: 6,
-  message: Errors.manyConnections,
-  headers: true,
-  statusCode: 429,
-});
