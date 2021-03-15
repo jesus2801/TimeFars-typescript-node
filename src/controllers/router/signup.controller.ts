@@ -1,11 +1,11 @@
-import {NextFunction, Request, Response} from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 import Validates from '../../helpers/validateFunctions';
 import Helpers from '../../helpers/helperFunctions';
-import {reportError} from '../../helpers/reportError';
-import {insertUser} from '../DB/signup.controller';
-import {sendMail} from '../../config/nodeMailer.setup';
-import {AppError} from '../../interfaces/index.interfaces';
+import { reportError } from '../../helpers/reportError';
+import { insertUser } from '../DB/signup.controller';
+import { sendMail } from '../../config/nodeMailer.setup';
+import { AppError } from '../../interfaces/index.interfaces';
 import Errors from '../../assets/errors';
 
 export default {
@@ -13,10 +13,16 @@ export default {
     try {
       res.status(200).render('out/signup', {
         title: 'TimeFars - Registro',
-        styles: [{style: `<link rel="stylesheet" href="/styles/loginSignup.min.css">`}],
+        styles: [
+          {
+            style: `<link rel="stylesheet" href="/styles/loginSignup.min.css">`,
+          },
+        ],
         scripts: [
-          {script: `<script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>`},
-          {script: `<script src="/js/dist/signup.js"></script>`},
+          {
+            script: `<script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>`,
+          },
+          { script: `<script src="/js/dist/signup.js"></script>` },
         ],
       });
     } catch (e) {
@@ -27,15 +33,25 @@ export default {
 
   postCtrl: async (req: any, res: Response, next: NextFunction) => {
     try {
-      let {name, email, pass} = req.body;
+      let { name, email, pass } = req.body;
       if (!Validates.validUserName(name)) {
-        Helpers.sendResponse(res, true, Errors.invalidSimbols('Nombre de usuario'));
+        Helpers.sendResponse(
+          res,
+          true,
+          Errors.invalidSimbols('Nombre de usuario')
+        );
         return;
       }
+
       if (!Validates.validEmail(email)) {
-        Helpers.sendResponse(res, true, Errors.invalidField('Correo electronico'));
+        Helpers.sendResponse(
+          res,
+          true,
+          Errors.invalidField('Correo electronico')
+        );
         return;
       }
+
       const hash: string = await Helpers.hashPass(pass);
       const code: string = Helpers.generateCode();
       const userID = await insertUser(name, email, hash, code);
@@ -46,7 +62,7 @@ export default {
         verified: false,
       };
       req.session.token = token;
-      res.send({error: false});
+      res.send({ error: false });
       sendMail(
         email,
         'verificar correo TimeFars',

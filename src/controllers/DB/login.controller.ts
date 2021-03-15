@@ -1,26 +1,31 @@
-import {PoolConnection} from 'mysql2/promise';
-import {connect} from '../../database';
+import { getRepository } from 'typeorm';
+import { User } from '../../entity/User';
 import Helpers from '../../helpers/helperFunctions';
 
 export function validLoginUser(mail: string, pass: string) {
   return new Promise<
-    boolean | {userID: number | string; userName: string; verified: number | string}
+    | boolean
+    | {
+        userID: number | string;
+        userName: string;
+        verified: boolean;
+      }
   >(async (resolved, reject) => {
     try {
-      const conn: PoolConnection = await connect();
-      const [[query]]: any = await conn.query('CALL `searchUserLogin`(?)', [mail]);
-      conn.release();
-      if (query.length === 0) {
+      const repository = getRepository(User);
+      const user = await repository.findOne({ mail });
+
+      if (!user) {
         resolved(false);
         return;
       }
-      const hash = query[0].pass;
-      const isValid: boolean = await Helpers.comparePass(hash, pass);
+
+      const isValid: boolean = await Helpers.comparePass(user.pass, pass);
       if (isValid) {
         resolved({
-          userID: query[0].userID,
-          userName: query[0].userName,
-          verified: query[0].verified,
+          userID: user.userID,
+          userName: user.userName,
+          verified: user.verified,
         });
         return;
       }

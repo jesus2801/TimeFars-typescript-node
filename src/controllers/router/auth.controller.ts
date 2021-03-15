@@ -1,12 +1,20 @@
-import {NextFunction, Response} from 'express';
+import { NextFunction, Response } from 'express';
 
-import {getCode, getEmail, validateEmailDB} from '../DB/auth.controller';
+import {
+  getCode,
+  getEmail,
+  validateEmailDB,
+} from '../DB/auth.controller';
 import Helpers from '../../helpers/helperFunctions';
-import {sendMail} from '../../config/nodeMailer.setup';
-import {AppError} from '../../interfaces/index.interfaces';
+import { sendMail } from '../../config/nodeMailer.setup';
+import { AppError } from '../../interfaces/index.interfaces';
 
 export default {
-  unverifiedEmail: async (req: any, res: Response, next: NextFunction) => {
+  unverifiedEmail: async (
+    req: any,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const email = await getEmail(req.token.sub);
       res.status(200).render('app/unverifiedEmail', {
@@ -25,6 +33,7 @@ export default {
       .then(response => {
         responses.mail = response;
         if (Object.keys(responses).length === 2) {
+          res.redirect('/unverifiedEmail');
           sendMail(
             responses.mail,
             'verificar correo TimeFars',
@@ -38,6 +47,7 @@ export default {
       .then(response => {
         responses.code = response;
         if (Object.keys(responses).length === 2) {
+          res.redirect('/unverifiedEmail');
           sendMail(
             responses.mail,
             'verificar correo TimeFars',
@@ -55,8 +65,9 @@ export default {
 
   verifyEmail: async (req: any, res: Response, next: NextFunction) => {
     try {
-      let {code} = req.params;
+      let { code } = req.params;
       const isValid = await validateEmailDB(code, req.token.sub);
+      console.log(isValid);
       if (!isValid) {
         res.redirect('/');
         return;

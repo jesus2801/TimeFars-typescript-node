@@ -1,9 +1,9 @@
-import {Response, NextFunction} from 'express';
+import { Response, NextFunction } from 'express';
 
 import Helpers from '../helpers/helperFunctions';
-import {validLoginUser} from '../controllers/DB/login.controller';
-import {insertUser} from '../controllers/DB/signup.controller';
-import {AppError} from '../interfaces/index.interfaces';
+import { validLoginUser } from '../controllers/DB/login.controller';
+import { insertUser } from '../controllers/DB/signup.controller';
+import { AppError } from '../interfaces/index.interfaces';
 
 export default {
   authCallback: async (req: any, res: Response, next: NextFunction) => {
@@ -53,7 +53,11 @@ export default {
     });
   },
 
-  verifyToken: async function (req: any, res: Response, next: NextFunction) {
+  verifyToken: async function (
+    req: any,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const cookieToken = req.session.token;
       if (cookieToken) {
@@ -70,7 +74,11 @@ export default {
     }
   },
 
-  verifyUser: async function (req: any, res: Response, next: NextFunction) {
+  verifyUser: async function (
+    req: any,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const cookieToken = req.session.token;
       if (cookieToken) {

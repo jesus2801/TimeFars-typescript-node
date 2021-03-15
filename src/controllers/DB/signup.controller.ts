@@ -1,18 +1,25 @@
-import {PoolConnection} from 'mysql2/promise';
-import {connect} from '../../database';
+import { getRepository } from 'typeorm';
+import { User } from '../../entity/User';
 
-export function insertUser(names: string, mail: string, pass: string, code: string) {
+export function insertUser(
+  names: string,
+  mail: string,
+  pass: string,
+  code: string
+) {
   return new Promise<number>(async (resolved, reject) => {
     try {
-      const conn: PoolConnection = await connect();
-      const [[response]]: any = await conn.query('CALL insertUser(?,?,?,?)', [
-        names,
-        mail,
-        pass,
-        code,
-      ]);
-      conn.release();
-      resolved(response[0].latestId);
+      const repository = getRepository(User);
+      const user = new User();
+      user.userName = names;
+      user.mail = mail;
+      user.pass = pass;
+      user.avatar = 'n-1';
+      user.verificationCode = code;
+      user.verified = false;
+      const insertUser = await repository.save(user);
+
+      resolved(insertUser.userID);
     } catch (e) {
       reject(e);
     }

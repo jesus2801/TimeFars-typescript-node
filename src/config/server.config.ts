@@ -1,7 +1,8 @@
 //nodejs modules
-import express, {Application, urlencoded, json} from 'express';
-import {initialize, session} from 'passport';
+import express, { Application, urlencoded, json } from 'express';
+import { initialize, session } from 'passport';
 import expressSession from 'express-session';
+import { createConnection } from 'typeorm';
 import cookieParser from 'cookie-parser';
 import exHbs from 'express-handlebars';
 import compression from 'compression';
@@ -20,14 +21,17 @@ require('./passport.setup');
 
 export class App {
   private app: Application;
+
   constructor(private port?: number | string) {
     this.app = express();
+    createConnection();
     this.settings();
     this.middlewares();
     this.routes();
     this.extra();
   }
-  settings() {
+
+  private settings() {
     this.app.set(`views`, path.join(__dirname, `../views`));
     this.app.set('port', process.env.PORT || this.port || 3000);
     this.app.set('view engine', '.hbs');
@@ -45,7 +49,8 @@ export class App {
       })
     );
   }
-  middlewares() {
+
+  private middlewares() {
     this.app.use(
       helmet.contentSecurityPolicy({
         directives: {
@@ -78,31 +83,37 @@ export class App {
     this.app.use(helmet.xssFilter());
     // this.app.use('/app', AppRateLimiter);
     this.app.use(compression());
-    this.app.use(urlencoded({extended: false, limit: 5242880}));
-    this.app.use(json({limit: 5242880}));
+    this.app.use(urlencoded({ extended: false, limit: 5242880 }));
+    this.app.use(json({ limit: 5242880 }));
     this.app.use(cookieParser());
     this.app.use(
       expressSession({
         secret: process.env.EXPRESS_SESSION_SECRET!,
         resave: true,
         saveUninitialized: false,
-        cookie: {secure: process.env.STATE! == 'dev' ? false : true, maxAge: 28800000},
+        cookie: {
+          secure: process.env.STATE! == 'dev' ? false : true,
+          maxAge: 28800000,
+        },
       })
     );
     this.app.use(initialize()); //passport
     this.app.use(session()); //passport
     this.app.use(morgan('dev'));
   }
-  routes() {
+
+  private routes() {
     this.app.use(mainRoutes);
     this.app.use('/app', homeRoute);
   }
-  extra() {
+
+  private extra() {
     this.app.use(express.static(path.join(__dirname, '../public')));
     this.app.use(NotFoundCtrl.mainView);
     this.app.use(ErrorsCtrl.mainView);
   }
-  async listen() {
+
+  public async listen() {
     const server = await this.app.listen(this.app.get('port'));
     console.log(
       `server is running on port ${this.app.get('port')} and 

@@ -1,10 +1,14 @@
-import {Response} from 'express';
+import { Response } from 'express';
 import bcrypt from 'bcrypt';
-import {alphabet} from './helperVariables';
+import { alphabet } from './helperVariables';
 import config from '../config/config';
 
 export default {
-  sendResponse: function (res: Response, err: boolean, message: string): void {
+  sendResponse: function (
+    res: Response,
+    err: boolean,
+    message: string
+  ): void {
     res.json({
       error: err,
       message,

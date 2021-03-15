@@ -1,6 +1,3 @@
-import {PoolConnection} from 'mysql2/promise';
-import {connect} from '../database';
-
 export const reportError = async (
   err: ErrorConstructor,
   ip: string,
@@ -8,15 +5,7 @@ export const reportError = async (
   userID?: number | string
 ): Promise<void> => {
   try {
-    console.log(err);
-    const conn: PoolConnection = await connect();
-    conn.query('CALL `insertError`(?,?,?,?,?)', [
-      err,
-      ip,
-      url,
-      userID ? userID : null,
-      new Date(), //date
-    ]);
+    console.log(err, ip, url, userID);
   } catch (e) {
     console.log(e);
   }
